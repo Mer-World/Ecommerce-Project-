@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>eCommerce Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+
+    <style>
+         /* Dark mode styles */
+    body.dark-mode {
+      background-color: black;
+      color: #eee;
+    }
+    /* Hide card border by default in dark mode */
+    /* Shared base card style */
+    .card {
+    border: none;
+    transition: all 0.3s ease;
+    }
+
+    /* Light mode default card background (blends in) */
+    body:not(.dark-mode) .card {
+    background-color: #fff; /* Or match your body background */
+    }
+
+    /* Dark mode card background (blends in) */
+    body.dark-mode .card {
+    background-color: black;
+    color:white /* Match your dark body bg */
+    }
+
+    /* Hover effect for both modes */
+    .card:hover {
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.15); /* Light mode shadow */
+    border: 1px solid rgba(123, 95, 207, 0.5); /* Faint border */
+    }
+
+    body.dark-mode .card:hover {
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.15); /* Dark mode glow */
+    border: 1px solid #7b5fcf;
+    }
+
+    body.dark-mode .navbar {
+      background-color: #4b367c;
+    }
+    body.dark-mode .navbar a, body.dark-mode .navbar-brand {
+      color: #4e1fbb;
+    }
+    body.dark-mode .navbar a:hover {
+      color: #8168e4;
+    }
+    body.dark-mode button.btn-primary {
+      background-color: #7b5fcf;
+      border-color: #7b5fcf;
+    }
+        body.dark-mode .card-title,
+    body.dark-mode .card-text.text-muted {
+    color: white !important;
+    }
+        .card-body {
+    display: flex;
+    flex-direction: column;
+    }
+
+    .card-body button.add-to-cart-btn {
+    margin-top: auto;
+    }
+    </style>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">Mer-Store</a>
+    <div class="d-flex align-items-center gap-2">
+        <a href="cart.html" class="btn btn-light position-relative me-2" style="color:#6f42c1;font-weight:600;">
+            Cart 🛒 <span id="cart-count">0</span>
+        </a>
+        <a href="dashboard.html" class="btn btn-light me-3" style="color:#6f42c1; font-weight:600;">
+            Dashboard
+        </a>
+        <button id="darkModeToggle" class="btn btn-light" style="color:#6f42c1;" style="background-color: #6f42c1;">🌙☀️</button>
+    </div>
+  </div>
+</nav>
+<div class="container mt-4">
+    <div class="d-flex justify-content-center">
+  <input type="text" id="search" class="form-control mb-3" placeholder="Search products..." style="width: 300px;" />
+</div>
+   
+    <div class="row" id="product-list"></div>
+    <div class="text-center mt-3">
+        <!-- Fixed id here: removed trailing space -->
+        <button class="btn btn-primary" id="loadmore" onclick="loadMore()">Load More</button>
+    </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    
+  const apiURL = 'https://dummyjson.com/products?limit=100';
+
+  let allProducts = [];
+  let visibleCount = 8;
+
+  function fetchProducts(){
+    
+  fetch(apiURL)
+  .then(res => res.json())
+  .then(data => {
+    allProducts = data.products;
+    showProducts();
+    updateCartBadge();
+  })
+  .catch(e => {
+    console.error('Failed to fetch products: ', e);
+  });
+
+  }
+
+function showProducts() {
+  const container = document.getElementById('product-list');
+  container.innerHTML = '';
+
+  const searchInput = document.getElementById('search');
+  let searchVal = searchInput.value.toLowerCase();
+
+  let filtered = [];
+  for (let i = 0; i < allProducts.length; i++) {
+    const title = allProducts[i].title.toLowerCase();
+    if (title.includes(searchVal)) {
+      filtered.push(allProducts[i]);
+    }
+  }
+
+  const max = Math.min(filtered.length, visibleCount);
+  for (let i = 0; i < max; i++) {
+    const product = filtered[i];
+
+    const card = document.createElement('div');
+    card.className = 'col-md-3 mb-3';
+
+    // Create inner HTML without onclick
+    card.innerHTML = `
+      <div class="card h-100 shadow-sm">
+        <img src="${product.thumbnail}" class="card-img-top p-4" style="height:180px; object-fit: contain;" alt="${product.title}">
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title">${product.title}</h6>
+          <p class="card-text text-muted">$${product.price}</p>
+          <button class="btn btn-primary add-to-cart-btn">Add to Cart</button>
+        </div>
+      </div>
+    `;
+    card.querySelector('.add-to-cart-btn').addEventListener('click', function() {
+      addToCart(product);
+    });
+
+    container.appendChild(card);
+  }
+}
+
+
+
+function addToCart(item) {
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let found = false;
+  for (let i = 0; i < cart.length; i++) {
+    if (cart[i].id === item.id) {
+      cart[i].quantity++;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    cart.push({ ...item, quantity: 1 });
+  }
+  localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartBadge();
+    alert(`${item.title} has been added to your cart!`);
+}
+
+
+function updateCartBadge(){
+    const badge = document.getElementById('cart-count');
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
+    let totalQuantity = 0;
+    for(let i = 0; i < cart.length; i++){
+        totalQuantity += cart[i].quantity;
+    }
+    badge.innerText = totalQuantity;
+}
+
+function loadMore(){
+    visibleCount += 4;
+    showProducts();
+}
+    const toggleBtn = document.getElementById('darkModeToggle');
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      if(document.body.classList.contains('dark-mode')) {
+        toggleBtn.innerText = '☀️';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        toggleBtn.innerText = '🌙';
+        localStorage.setItem('theme', 'light');
+      }
+    });
+
+        document.addEventListener('DOMContentLoaded', () => {
+      fetchProducts();
+      document.getElementById('loadmore').addEventListener('click', loadMore);
+      document.getElementById('search').addEventListener('input', showProducts);
+
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        toggleBtn.innerText = '☀️';
+      }
+      updateCartBadge();
+    });
+  </script>
+
+</body>
+</html>

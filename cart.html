@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title> 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+         body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #ffffff;
+      color: #212529;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .card {
+      border-radius: 15px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+  .navbar-brand {
+    color:#6f42c1
+  }
+    .navbar a, .navbar-brand {
+      transition: color 0.3s;
+    }
+    .navbar a:hover {
+      color: #ddd;
+    }
+    /* Dark Mode Styles */
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    body.dark-mode .card {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    body.dark-mode .navbar {
+      background-color: #ffffff;
+    }
+    body.dark-mode .navbar a, 
+    body.dark-mode .navbar-brand {
+      color: #ccc;
+    }
+    body.dark-mode .navbar a:hover {
+      color: #eee;
+    }
+    .btn-toggle {
+      cursor: pointer;
+      background-color: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      user-select: none;
+    }
+    body.dark-mode .btn-toggle {
+      border-color: #ccc;
+      color: #ccc;
+    }
+        
+
+</style>
+    
+</head>
+<body>
+   <nav class="navbar navbar-expand-lg navbar-dark">
+
+    <div class="container-fluid">
+        <a href="index.html" class="navbar-brand">Mer-Store</a>
+        <div class="d-flex align-items-center gap-2">
+            <button id="darkModeToggle" class="btn-toggle" aria-label="Toggle Dark Mode">🌙</button>
+            <a href="products.html" class="btn btn-light" style="color:#6f42c1;" style="background-color: #6f42c1;">Back to Store</a>
+        </div>
+    </div>
+   </nav>
+
+   <div class="container mt-4">
+    <h2>🛒</h2>  
+    <h4 class="mt-4">Total Price: $ <span id="total-price">0.00</span></h4>
+    <div id="cart-items" class="row gy-4"></div>
+   </div>
+<script>
+function showCart() {
+  const container = document.getElementById("cart-items");
+  const rawCart = JSON.parse(localStorage.getItem('cart')) || [];
+  container.innerHTML = '';
+  let total = 0;
+
+  if (rawCart.length === 0) {
+    container.innerHTML = `<p>Your cart is empty.</p>`;
+    document.getElementById('total-price').innerText = '0.00';
+    return;
+  }
+
+  const combinedCart = [];
+
+  for (let i = 0; i < rawCart.length; i++) {
+    const currentItem = rawCart[i];
+    let found = false;
+
+    for (let j = 0; j < combinedCart.length; j++) {
+      if (combinedCart[j].id === currentItem.id) {
+        combinedCart[j].quantity += currentItem.quantity;
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      combinedCart.push({ ...currentItem }); // clone the item
+    }
+  }
+
+  // Create a Bootstrap row
+  let row = document.createElement('div');
+  row.className = 'row';
+
+  for (let i = 0; i < combinedCart.length; i++) {
+    const item = combinedCart[i];
+    const col = document.createElement('div');
+    col.className = 'col-md-4 mb-4';
+
+   col.innerHTML = `
+  <div class="card h-100 mt-5 shadow-sm">
+    <img src="${item.thumbnail}" class="card-img-top p-3" style="height:180px; object-fit:contain;" alt="${item.title}">
+    <div class="card-body d-flex flex-column">
+      <h6 class="card-title">${item.title}</h6>
+      <label>Quantity:</label>
+      <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}" class="form-control form-control-sm mb-2" />
+      <button class="btn btn-sm mb-2" style="background-color:white; color:black" onclick="updateCartQuantity(${item.id})">Update</button>
+
+      <p class="card-text">Total: $${(item.price * item.quantity).toFixed(2)}</p>
+      <div class="d-flex justify-content-between"> 
+        <button class="btn btn-danger btn-sm" onclick="removeItem(${item.id})">Remove</button>
+      </div>
+    </div>
+  </div>
+`;
+
+    row.appendChild(col);
+    total += item.price * item.quantity;
+  }
+
+  container.appendChild(row);
+  document.getElementById('total-price').innerText = total.toFixed(2);
+}
+
+
+function removeItem(id){
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let newCart = [];
+
+    for(let i = 0; i < cart.length; i++){
+        if(cart[i].id !== id){
+            newCart.push(cart[i]);
+        }
+    }
+    localStorage.setItem('cart', JSON.stringify(newCart));
+    showCart();
+}
+
+
+function updateCartQuantity(id) {
+  const qtyInput = document.getElementById(`qty-${id}`);
+  const newQty = parseInt(qtyInput.value);
+
+  if (isNaN(newQty) || newQty <= 0) {
+    alert("Please enter a valid quantity.");
+    return;
+  }
+
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  for (let i = 0; i < cart.length; i++) {
+    if (cart[i].id === id) {
+      cart[i].quantity = newQty;
+      break;
+    }
+  }
+  alert("Quantity updated successfully!");
+
+  localStorage.setItem('cart', JSON.stringify(cart));
+
+  showCart();
+}
+
+   // Dark mode toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+
+    // Load dark mode setting from localStorage
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      document.body.classList.add('dark-mode');
+      darkModeToggle.textContent = '☀️';
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      if (document.body.classList.contains('dark-mode')) {
+        darkModeToggle.textContent = '☀️';
+        localStorage.setItem('darkMode', 'enabled');
+      } else {
+        darkModeToggle.textContent = '🌙';
+        localStorage.setItem('darkMode', 'disabled');
+      }
+    });
+
+
+
+document.addEventListener
+        ('DOMContentLoaded', () => {
+      showCart();
+    });
+
+</script>
+
+
+    
+       
+
+
+
+
+
+
+
+
+
+</body>
+
+
+</html>
