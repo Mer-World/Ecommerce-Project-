@@ -18,9 +18,9 @@ A beginner-friendly eCommerce dashboard project built with HTML, CSS, Bootstrap,
 ---
 
 📸 Screenshots
-![Homepage Screenshot](https://user-images.githubusercontent.com/homepage.PNG)
-![Products Screenshot](https://user-images.githubusercontent.com/products.PNG)
-![dashboard Screenshot](https://user-images.githubusercontent.com/dashboard.PNG)
+![Homepage Screenshot](homepage.PNG)
+![Products Screenshot](products.PNG)
+![dashboard Screenshot](dashboard.PNG)
 
 
 
