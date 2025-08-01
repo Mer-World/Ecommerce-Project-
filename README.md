@@ -5,6 +5,8 @@ A beginner-friendly eCommerce dashboard project built with HTML, CSS, Bootstrap,
 
 You can check it out here
 https://finalecommerceproject.vercel.app/
+or
+https://mer-world.github.io/Ecommerce-Project-/
 
 ---
 
