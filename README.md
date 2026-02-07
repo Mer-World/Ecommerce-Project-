@@ -1,7 +1,7 @@
 
 🛒 Simple eCommerce Dashboard
 
-A beginner-friendly eCommerce dashboard project built with HTML, CSS, Bootstrap, and Vanilla JavaScript. This project demonstrates essential front-end concepts like DOM manipulation , localStorage, CRUD operations, and chart rendering using Chart.js.
+This is a beginner-friendly eCommerce dashboard project built with HTML, CSS, Bootstrap, and Vanilla JavaScript. This project demonstrates essential front-end concepts like DOM manipulation , localStorage, CRUD operations, and chart rendering using Chart.js.
 
 You can check it out here
 https://finalecommerceproject.vercel.app/
